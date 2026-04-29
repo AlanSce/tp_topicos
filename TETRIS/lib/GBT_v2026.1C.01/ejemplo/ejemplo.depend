@@ -1,0 +1,61 @@
+# depslib dependency file v1.0
+1776494237 source:c:\topicos\libgbt-dist\ejemplo\dibujos.c
+	"dibujos.h"
+
+1776494213 c:\topicos\libgbt-dist\ejemplo\dibujos.h
+	<GBT/gbt.h>
+
+1776476331 c:\topicos\libgbt-dist\ejemplo\lib\gbt_v20261c01\include\gbt\gbt.h
+	"gbt_entrada.h"
+	"gbt_graficos.h"
+	"gbt_logger.h"
+	"gbt_temporizador.h"
+	"gbt_vector.h"
+
+1776476331 c:\topicos\libgbt-dist\ejemplo\lib\gbt_v20261c01\include\gbt\gbt_entrada.h
+	<stdint.h>
+
+1776490905 c:\topicos\libgbt-dist\ejemplo\lib\gbt_v20261c01\include\gbt\gbt_graficos.h
+	<stdint.h>
+
+1776476331 c:\topicos\libgbt-dist\ejemplo\lib\gbt_v20261c01\include\gbt\gbt_logger.h
+
+1776476331 c:\topicos\libgbt-dist\ejemplo\lib\gbt_v20261c01\include\gbt\gbt_temporizador.h
+	<stdint.h>
+
+1775859940 c:\topicos\libgbt-dist\ejemplo\lib\gbt_v20261c01\include\gbt\gbt_vector.h
+	<stdlib.h>
+	<stdint.h>
+
+1776494193 source:c:\topicos\libgbt-dist\ejemplo\main.c
+	<stdio.h>
+	<stdlib.h>
+	"dibujos.h"
+	<time.h>
+	<stdint.h>
+	"GBT/gbt.h"
+
+1776492694 source:c:\topicos\libgbt-dist\ejemplo\logica.c
+
+1776476331 c:\topicos\libgbt-dist\ejemplo\lib\gbt_v2026.1c.01\include\gbt\gbt.h
+	"gbt_entrada.h"
+	"gbt_graficos.h"
+	"gbt_logger.h"
+	"gbt_temporizador.h"
+	"gbt_vector.h"
+
+1776476331 c:\topicos\libgbt-dist\ejemplo\lib\gbt_v2026.1c.01\include\gbt\gbt_entrada.h
+	<stdint.h>
+
+1776490905 c:\topicos\libgbt-dist\ejemplo\lib\gbt_v2026.1c.01\include\gbt\gbt_graficos.h
+	<stdint.h>
+
+1776476331 c:\topicos\libgbt-dist\ejemplo\lib\gbt_v2026.1c.01\include\gbt\gbt_logger.h
+
+1776476331 c:\topicos\libgbt-dist\ejemplo\lib\gbt_v2026.1c.01\include\gbt\gbt_temporizador.h
+	<stdint.h>
+
+1775859940 c:\topicos\libgbt-dist\ejemplo\lib\gbt_v2026.1c.01\include\gbt\gbt_vector.h
+	<stdlib.h>
+	<stdint.h>
+
