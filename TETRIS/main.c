@@ -6,8 +6,9 @@ Entrega: Sí
 
 Apellido: Leal, Luciano Gaspar
 DNI: 40514151
-Usuario: LucianoLeal97
+Usuario: Lucianoleal97
 Entrega: Si
+
 
 */
 
@@ -16,7 +17,7 @@ Entrega: Si
 #include <string.h>
 #include <stdlib.h>
 #include <time.h>
-#include "GBT/gbt.h"
+#include "lib/GBT_v2026.1C.01/include/GBT/gbt.h"
 #include "Funciones.h"
 
 
