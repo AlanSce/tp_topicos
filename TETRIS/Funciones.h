@@ -77,6 +77,12 @@ typedef struct {
     int16_t columna;
 } tPiezaActiva;
 
+typedef enum {
+    ESTADO_MENU,
+    ESTADO_JUGANDO,
+    ESTADO_GAME_OVER
+} tEstadoJuego;
+
 typedef uint8_t tTablero[TABLERO_FILAS][TABLERO_COLUMNAS];
 
 extern tGBT_ColorRGB paletaNES[CANT_COLORES];
@@ -119,4 +125,7 @@ void dibujar_pieza_activa(const tRender *render, const tPiezaActiva *pieza);
 
 void dibujar_estadisticas(const tRender *render);
 void dibujar_pantalla_base(const tConfiguracionVentana *config);
+
+void dibujar_menu_principal(const tConfiguracionVentana *config, uint8_t opcion);
+
 #endif // FUNCIONES_H_INCLUDED

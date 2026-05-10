@@ -51,7 +51,10 @@
     {'T', {0x1F, 0x04, 0x04, 0x04, 0x04, 0x04, 0x04}},
     {'V', {0x11, 0x11, 0x11, 0x11, 0x11, 0x0A, 0x04}},
     {'X', {0x11, 0x11, 0x0A, 0x04, 0x0A, 0x11, 0x11}},
-    {'Y', {0x11, 0x11, 0x0A, 0x04, 0x04, 0x04, 0x04}}
+    {'Y', {0x11, 0x11, 0x0A, 0x04, 0x04, 0x04, 0x04}},
+    {'G', {0x0E, 0x10, 0x10, 0x17, 0x11, 0x11, 0x0E}},
+    {'J', {0x1F, 0x02, 0x02, 0x02, 0x12, 0x12, 0x0C}},
+    {'U', {0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x0E}}
 };
 
  const uint8_t tetrominos[CANT_TETROMINOS][4][4][4] = {
@@ -368,6 +371,10 @@
 {
     uint8_t rotacion_anterior = pieza->rotacion;
 
+    printf("rotacion anterior=%d nueva=%d\n",
+       rotacion_anterior,
+       pieza->rotacion);
+
     if (direccion > 0) {
         pieza->rotacion = (pieza->rotacion + 1) % 4;
     } else {
@@ -541,4 +548,27 @@
     dibujar_marco_nes(&render, 224, 140, 66, 36);
     dibujar_texto(&render, 229, 148, "LEVEL", COLOR_BLANCO, 2);
     dibujar_texto(&render, 252, 162, "00", COLOR_BLANCO, 2);
+}
+void dibujar_menu_principal(const tConfiguracionVentana *config, uint8_t opcion)
+{
+    tRender render = crear_render(config);
+
+    dibujar_fondo_ladrillos(&render);
+    dibujar_marco_nes(&render, 60, 40, 200, 110);
+
+    dibujar_texto(&render, 95, 55, "TETRIS", COLOR_BLANCO, 3);
+
+    // Opción 0: JUGAR
+    if (opcion == 0) {
+        dibujar_texto(&render, 90, 90, "> JUGAR", COLOR_AZUL, 2);
+    } else {
+        dibujar_texto(&render, 90, 90, "  JUGAR", COLOR_ROJO, 2);
+    }
+
+    // Opción 1: SALIR
+    if (opcion == 1) {
+        dibujar_texto(&render, 100, 125, "> SALIR", COLOR_AZUL, 2);
+    } else {
+        dibujar_texto(&render, 100, 125, "  SALIR", COLOR_ROJO, 2);
+    }
 }

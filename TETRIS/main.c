@@ -33,6 +33,9 @@ int main(int argc, char *argv[])
     tTablero tablero;
     tPiezaActiva pieza;
 
+    tEstadoJuego estado = ESTADO_MENU;
+    uint8_t opcion_menu = 0;
+
     if (gbt_iniciar() != 0) {
         fprintf(stderr, "Error al iniciar GBT: %s\n", gbt_obtener_log());
         return -1;
@@ -68,6 +71,31 @@ int main(int argc, char *argv[])
     while (corriendo) {
         gbt_procesar_entrada();
         eGBT_Tecla tecla = gbt_obtener_tecla_presionada();
+        if (estado == ESTADO_MENU) {
+
+            if (tecla == GBTK_ARRIBA || tecla == GBTK_ABAJO) {
+                opcion_menu = !opcion_menu;
+            }
+
+        if (tecla == GBTK_ENTER) {
+
+                if (opcion_menu == 0) {
+                    tablero_vaciar(tablero);
+                    pieza = crear_pieza_aleatoria();
+                    estado = ESTADO_JUGANDO;
+
+        } else {
+                corriendo = 0;
+        }
+        }
+
+        dibujar_menu_principal(&config, opcion_menu);
+
+        gbt_volcar_backbuffer();
+        gbt_esperar(16);
+
+        continue;
+    }
 
         if (tecla == GBTK_ESCAPE) {
             printf("[tecla] ESCAPE\n");
