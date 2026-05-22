@@ -19,7 +19,7 @@
 #define TABLERO_FILAS_OCULTAS 2
 #define TABLERO_FILAS (TABLERO_FILAS_VISIBLES + TABLERO_FILAS_OCULTAS)
 #define TAM_CELDA 7
-#define TABLERO_X 118
+#define TABLERO_X 124
 #define TABLERO_Y 38
 #define CAIDA_INICIAL_SEGUNDOS 0.6
 
@@ -79,8 +79,11 @@ typedef struct {
 
 typedef enum {
     ESTADO_MENU,
+    ESTADO_SUBMENU_JUEGO,
+    ESTADO_INSTRUCCIONES,
     ESTADO_JUGANDO,
-    ESTADO_GAME_OVER
+    ESTADO_PAUSA,
+    ESTADO_SALIR
 } tEstadoJuego;
 
 typedef uint8_t tTablero[TABLERO_FILAS][TABLERO_COLUMNAS];
@@ -118,13 +121,20 @@ uint8_t puede_ubicar(const tTablero tablero, const tPiezaActiva *pieza, int16_t 
 uint8_t intentar_mover(tTablero tablero, tPiezaActiva *pieza, int16_t delta_fila, int16_t delta_columna, const char *origen);
 uint8_t intentar_rotar(tTablero tablero, tPiezaActiva *pieza, int8_t direccion, const char *origen);
 
+void reiniciar_partida(tTablero tablero, tPiezaActiva *pieza);
+
 void fijar_pieza(tTablero tablero, const tPiezaActiva *pieza);
+uint8_t eliminar_lineas(tTablero tablero);
+
+void dibujar_submenu_juego(const tConfiguracionVentana *config, uint8_t opcion);
+void dibujar_pausa(const tConfiguracionVentana *config);
 
 void dibujar_tablero(const tRender *render, const tTablero tablero);
 void dibujar_pieza_activa(const tRender *render, const tPiezaActiva *pieza);
 
 void dibujar_estadisticas(const tRender *render);
 void dibujar_pantalla_base(const tConfiguracionVentana *config);
+void dibujar_instrucciones(const tConfiguracionVentana *config);
 
 void dibujar_menu_principal(const tConfiguracionVentana *config, uint8_t opcion);
 
