@@ -39,8 +39,10 @@
     {'8', {0x0E, 0x11, 0x11, 0x0E, 0x11, 0x11, 0x0E}},
     {'9', {0x0E, 0x11, 0x11, 0x0F, 0x01, 0x01, 0x0E}},
     {'A', {0x0E, 0x11, 0x11, 0x1F, 0x11, 0x11, 0x11}},
+    {'B', {0x1E, 0x11, 0x11, 0x1E, 0x11, 0x11, 0x1E}},
     {'C', {0x0F, 0x10, 0x10, 0x10, 0x10, 0x10, 0x0F}},
     {'E', {0x1F, 0x10, 0x10, 0x1E, 0x10, 0x10, 0x1F}},
+    {'F', {0x1F, 0x10, 0x10, 0x1E, 0x10, 0x10, 0x10}},
     {'I', {0x1F, 0x04, 0x04, 0x04, 0x04, 0x04, 0x1F}},
     {'L', {0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x1F}},
     {'N', {0x11, 0x19, 0x15, 0x13, 0x11, 0x11, 0x11}},
@@ -58,7 +60,10 @@
     {'<', {0x02, 0x04, 0x08, 0x10, 0x08, 0x04, 0x02}},
     {'>', {0x08, 0x04, 0x02, 0x01, 0x02, 0x04, 0x08}},
     {'^', {0x04, 0x0A, 0x11, 0x00, 0x00, 0x00, 0x00}},
-    {'Q', {0x0E, 0x11, 0x11, 0x11, 0x15, 0x12, 0x0D}}
+    {'Q', {0x0E, 0x11, 0x11, 0x11, 0x15, 0x12, 0x0D}},
+    {'D', {0x1E, 0x11, 0x11, 0x11, 0x11, 0x11, 0x1E}},
+    {'M', {0x11, 0x1B, 0x15, 0x15, 0x11, 0x11, 0x11}}
+
 };
 
  const uint8_t tetrominos[CANT_TETROMINOS][4][4][4] = {
@@ -115,8 +120,8 @@
     5,
     COLOR_ROJO
 };
-
- const char nombres_piezas[CANT_TETROMINOS] = {'I', 'J', 'L', 'O', 'S', 'T', 'Z'};
+    const char nombres_piezas[CANT_TETROMINOS] = {'I', 'J', 'L', 'O', 'S', 'T', 'Z'};
+    extern float velocidad_actual;
 
  tConfiguracionVentana obtener_configuracion(tOpcionesArranque opciones)
 {
@@ -464,7 +469,7 @@ void dibujar_fondo_ladrillos(const tRender *render)
     }
 }
 
- void dibujar_estadisticas(const tRender *render)
+ void dibujar_estadisticas(const tRender *render,const uint32_t estadisticas[])
 {
     static const uint8_t pieza_t[4][4] = {
         {1, 1, 1, 0},
@@ -472,36 +477,42 @@ void dibujar_fondo_ladrillos(const tRender *render)
         {0, 0, 0, 0},
         {0, 0, 0, 0}
     };
+
     static const uint8_t pieza_z[4][4] = {
         {1, 1, 0, 0},
         {0, 1, 1, 0},
         {0, 0, 0, 0},
         {0, 0, 0, 0}
     };
+
     static const uint8_t pieza_o[4][4] = {
         {1, 1, 0, 0},
         {1, 1, 0, 0},
         {0, 0, 0, 0},
         {0, 0, 0, 0}
     };
+
     static const uint8_t pieza_l[4][4] = {
         {1, 0, 0, 0},
         {1, 0, 0, 0},
         {1, 1, 0, 0},
         {0, 0, 0, 0}
     };
+
     static const uint8_t pieza_s[4][4] = {
         {0, 1, 1, 0},
         {1, 1, 0, 0},
         {0, 0, 0, 0},
         {0, 0, 0, 0}
     };
+
     static const uint8_t pieza_j[4][4] = {
         {0, 1, 0, 0},
         {0, 1, 0, 0},
         {1, 1, 0, 0},
         {0, 0, 0, 0}
     };
+
     static const uint8_t pieza_i[4][4] = {
         {1, 1, 1, 1},
         {0, 0, 0, 0},
@@ -509,56 +520,94 @@ void dibujar_fondo_ladrillos(const tRender *render)
         {0, 0, 0, 0}
     };
 
-    const uint8_t (*piezas[7])[4] = {pieza_t, pieza_z, pieza_o, pieza_l, pieza_s, pieza_j, pieza_i};
-    const char *valores[7] = {"002", "004", "002", "002", "003", "003", "002"};
+    const uint8_t (*piezas[7])[4] = {
+        pieza_i,
+        pieza_j,
+        pieza_l,
+        pieza_o,
+        pieza_s,
+        pieza_t,
+        pieza_z
+    };
 
     dibujar_texto(render, 28, 62, "STATISTICS", COLOR_CIAN_BRILLANTE, 1);
 
     for (uint16_t i = 0; i < 7; i++) {
+
         uint16_t y = 78 + (i * 15);
-        dibujar_muestra_tetromino(render, 32, y, piezas[i], i == 2 ? COLOR_AZUL_BRILLANTE : COLOR_AZUL);
-        dibujar_texto(render, 72, y + 3, valores[i], COLOR_ROJO, 1);
+
+        char texto[4];
+
+        snprintf(texto,sizeof(texto),"%03u",estadisticas[i]);
+
+        dibujar_muestra_tetromino_chico(render,32,y,piezas[i],i == 2 ? COLOR_AZUL_BRILLANTE : COLOR_AZUL);
+
+        dibujar_texto(render,72,y + 3,texto,COLOR_ROJO,1);
     }
 }
 
- void dibujar_pantalla_base(const tConfiguracionVentana *config)
+void dibujar_pantalla_base(
+    const tConfiguracionVentana *config,
+    uint32_t score,
+    uint32_t top_score,
+    uint32_t lineas,
+    const tPiezaActiva *siguiente_pieza,
+    const uint32_t estadisticas[])
 {
-    static const uint8_t pieza_next[4][4] = {
-        {0, 1, 1, 0},
-        {1, 1, 0, 0},
-        {0, 0, 0, 0},
-        {0, 0, 0, 0}
-    };
-
     tRender render = crear_render(config);
+
+    char texto_score[7];
+    char texto_top[7];
+    char texto_lineas[10];
+
+    snprintf(texto_score,sizeof(texto_score),"%06u",score);
+
+    snprintf(texto_top,sizeof(texto_top),"%06u",top_score);
+
+    snprintf(texto_lineas,sizeof(texto_lineas),"LINES-%03u",lineas);
 
     dibujar_fondo_ladrillos(&render);
 
-    dibujar_marco_nes(&render, 12, 14, 94, 30);
+    dibujar_marco_nes(&render, 12, 14, 94, 35);
     dibujar_texto(&render, 28, 25, "A-TYPE", COLOR_CIAN_BRILLANTE, 2);
 
     dibujar_marco_nes(&render, 8, 54, 102, 134);
-    dibujar_estadisticas(&render);
 
-    dibujar_marco_nes(&render, 112, 8, 112, 24);
-    dibujar_texto(&render, 115, 15, "LINES-000", COLOR_CIAN_BRILLANTE, 2);
+    dibujar_estadisticas(&render,estadisticas);
+
+    dibujar_marco_nes(&render, 112, 8, 117, 29);
+
+    dibujar_texto(&render,117,15,texto_lineas,COLOR_CIAN_BRILLANTE,2);
 
     dibujar_marco_nes(&render, 118, 32, 82, 156);
 
-    dibujar_marco_nes(&render, 226, 8, 86, 70);
-    dibujar_texto(&render, 236, 20, "TOP", COLOR_CIAN_BRILLANTE, 2);
-    dibujar_texto(&render, 232, 34, "010000", COLOR_CIAN_BRILLANTE, 2);
-    dibujar_texto(&render, 232, 48, "SCORE", COLOR_CIAN_BRILLANTE, 2);
-    dibujar_texto(&render, 232, 62, "000000", COLOR_CIAN_BRILLANTE, 2);
+    dibujar_marco_nes(&render, 226, 8, 86, 80);
 
-    dibujar_marco_nes(&render, 224, 84, 66, 48);
-    dibujar_texto(&render, 230, 91, "NEXT", COLOR_CIAN_BRILLANTE, 2);
-    dibujar_muestra_tetromino(&render, 242, 108, pieza_next, COLOR_AZUL);
+    dibujar_texto(&render,236,20,"TOP",COLOR_CIAN_BRILLANTE,2);
 
-    dibujar_marco_nes(&render, 224, 140, 66, 36);
-    dibujar_texto(&render, 229, 148, "LEVEL", COLOR_CIAN_BRILLANTE, 2);
-    dibujar_texto(&render, 252, 162, "00", COLOR_AZUL, 2);
-    dibujar_texto(&render, 66, 176,"Q -> MAIN MENU",COLOR_ROJO,2);
+    dibujar_texto(&render,232,34,texto_top,COLOR_CIAN_BRILLANTE,2);
+
+    dibujar_texto(&render,232,48,"SCORE",COLOR_CIAN_BRILLANTE,2);
+
+    dibujar_texto(&render,232,62,texto_score,COLOR_CIAN_BRILLANTE,2);
+
+    dibujar_marco_nes(&render, 226, 84, 66, 48);
+
+    dibujar_texto(&render,230,91,"NEXT",COLOR_CIAN_BRILLANTE,2);
+
+    dibujar_muestra_tetromino(&render,242,108,tetrominos[siguiente_pieza->tipo][0],colores_piezas[siguiente_pieza->tipo]);
+    char texto_velocidad[32];
+
+    sprintf(texto_velocidad,"SPD %03d",(int)(velocidad_actual * 1000));
+
+    dibujar_texto(&render,22,170,texto_velocidad,COLOR_BLANCO,2);
+
+    uint32_t velocidad_ms =(uint32_t)(velocidad_actual * 1000.0f);
+
+    dibujar_marco_nes(&render, 226, 140, 66, 38);
+    sprintf(texto_velocidad, "%03uMS", velocidad_ms);dibujar_texto(&render,235,150,"SPD",COLOR_CIAN_BRILLANTE,1);
+
+    dibujar_texto(&render,235,160,texto_velocidad,COLOR_CIAN_BRILLANTE,1);
 }
 void dibujar_menu_principal(const tConfiguracionVentana *config, uint8_t opcion)
 {
@@ -598,26 +647,25 @@ void dibujar_submenu_juego(const tConfiguracionVentana *config, uint8_t opcion)
 
     dibujar_texto(&render, 78, 58, "SELECCION", COLOR_CIAN_BRILLANTE, 2);
 
-    // 0 -> CONTINUAR
     if (opcion == 0) {
         dibujar_texto(&render, 72, 88, "> CONTINUAR", COLOR_AZUL, 2);
-    } else {
+        }
+    else {
         dibujar_texto(&render, 72, 88, "  CONTINUAR", COLOR_ROJO, 2);
-    }
-
-    // 1 -> PARTIDA NUEVA
+        }
     if (opcion == 1) {
         dibujar_texto(&render, 72, 116, "> PARTIDA NUEVA", COLOR_AZUL, 2);
-    } else {
+        }
+     else {
         dibujar_texto(&render, 72, 116, "  PARTIDA NUEVA", COLOR_ROJO, 2);
     }
 
-    // 2 -> MENU PRINCIPAL
     if (opcion == 2) {
         dibujar_texto(&render, 72, 144, "> MENU PRINC", COLOR_AZUL, 2);
-    } else {
+        }
+    else {
         dibujar_texto(&render, 72, 144, "  MENU PRINC", COLOR_ROJO, 2);
-    }
+        }
 }
 void dibujar_instrucciones(const tConfiguracionVentana *config)
 {
@@ -629,7 +677,6 @@ void dibujar_instrucciones(const tConfiguracionVentana *config)
 
     dibujar_texto(&render, 68, 28, "INSTRUCCIONES", COLOR_CIAN_BRILLANTE, 2);
 
-    // Flechas
     dibujar_texto(&render, 138, 58, "^", COLOR_AZUL, 2);
     dibujar_texto(&render, 112, 82, "<", COLOR_AZUL, 2);
     dibujar_texto(&render, 164, 82, ">", COLOR_AZUL, 2);
@@ -639,17 +686,19 @@ void dibujar_instrucciones(const tConfiguracionVentana *config)
     dibujar_texto(&render, 190, 82, "MOVER", COLOR_CIAN_BRILLANTE, 1);
     dibujar_texto(&render, 190, 106, "BAJAR", COLOR_CIAN_BRILLANTE, 1);
 
-    // ENTER
     dibujar_marco_nes(&render, 46, 122, 70, 26);
     dibujar_texto(&render, 56, 130, "ENTER", COLOR_AZUL, 1);
 
-    dibujar_texto(&render, 128, 130, "INICIAR", COLOR_CIAN_BRILLANTE, 1);
+    dibujar_texto(&render, 128, 130, "ELEGIR", COLOR_CIAN_BRILLANTE, 1);
 
-    // Q
     dibujar_marco_nes(&render, 46, 152, 36, 20);
     dibujar_texto(&render, 58, 158, "Q", COLOR_AZUL, 1);
+    dibujar_texto(&render, 84, 158, "MENU", COLOR_CIAN_BRILLANTE, 1);
 
-    dibujar_texto(&render, 94, 158, "MENU", COLOR_CIAN_BRILLANTE, 1);
+    dibujar_marco_nes(&render, 126, 152, 36, 20);
+    dibujar_texto(&render, 138, 158, "P", COLOR_AZUL, 1);
+    dibujar_texto(&render, 164, 158, "PAUSA", COLOR_CIAN_BRILLANTE, 1);
+
 }
 
 uint8_t eliminar_lineas(tTablero tablero)
@@ -660,21 +709,18 @@ uint8_t eliminar_lineas(tTablero tablero)
 
         uint8_t completa = 1;
 
-        // Verificar si la fila esta completa
         for (int col = 0; col < TABLERO_COLUMNAS; col++) {
 
             if (tablero[fila][col] == 0) {
                 completa = 0;
-                break;
+                break; //este break es para performance, con que una columna este vacia ya no tiene sentido recorrer
             }
         }
 
-        // Si la fila esta completa
         if (completa) {
 
             lineas_eliminadas++;
 
-            // Bajar todas las filas superiores
             for (int y = fila; y > 0; y--) {
 
                 for (int x = 0; x < TABLERO_COLUMNAS; x++) {
@@ -682,16 +728,10 @@ uint8_t eliminar_lineas(tTablero tablero)
                 }
             }
 
-            // Vaciar fila superior
             for (int x = 0; x < TABLERO_COLUMNAS; x++) {
                 tablero[0][x] = 0;
             }
 
-            /*
-             IMPORTANTE:
-             Repetimos la misma fila porque ahora
-             cayo una nueva desde arriba.
-            */
             fila++;
         }
     }
@@ -703,7 +743,6 @@ void dibujar_pausa(const tConfiguracionVentana *config)
     tRender render = crear_render(config);
 
     dibujar_marco_nes(&render, 96, 80, 128, 40);
-
     dibujar_texto(&render, 118, 94, "PAUSA", COLOR_ROJO, 2);
 }
 
@@ -715,4 +754,77 @@ void reiniciar_partida(tTablero tablero, tPiezaActiva *pieza)
 }
 
 
+void dibujar_pantalla_dificultad(
+    const tConfiguracionVentana *config,
+    uint8_t opcion)
+{
+    tRender render = crear_render(config);
 
+    dibujar_fondo_ladrillos(&render);
+    dibujar_marco_nes(&render, 80, 80, 137, 95);
+    dibujar_texto(&render,70,25,"SELECCIONAR",COLOR_BLANCO,3);
+
+    dibujar_texto(&render,95,45,"DIFICULTAD",COLOR_BLANCO,3);
+
+    const char *opciones[3] = {
+        "FACIL",
+        "NORMAL",
+        "DIFICIL"
+    };
+
+    for (int i = 0; i < 3; i++) {
+
+        uint8_t color = COLOR_GRIS_CLARO;
+
+        if (i == opcion) {
+
+            color = COLOR_CIAN_BRILLANTE;
+
+            dibujar_texto(&render,70,85 + (i * 25),">",COLOR_CIAN_BRILLANTE,3);
+        }
+
+        dibujar_texto(&render,90,85 + (i * 25),opciones[i],color,3);
+    }
+}
+
+
+void dibujar_ingreso_nombre(
+    const tConfiguracionVentana *config,
+    const char *nombre)
+{
+    tRender render = crear_render(config);
+
+    dibujar_fondo_ladrillos(&render);
+
+    dibujar_marco_nes(&render, 30, 35, 270, 120);
+
+    dibujar_texto(&render, 45, 48, "INGRESE NOMBRE", COLOR_CIAN_BRILLANTE, 3);
+
+    dibujar_rectangulo(&render, 70, 88, 180, 20, COLOR_GRIS_CLARO);
+
+    dibujar_texto(&render, 78, 93, nombre, COLOR_NEGRO, 2);
+
+    dibujar_rectangulo(&render, 78, 122, 164, 18, COLOR_GRIS_OSCURO);
+
+    dibujar_texto(&render, 92, 127, "ENTER PARA CONTINUAR", COLOR_CIAN_BRILLANTE, 1);
+}
+
+void dibujar_mino_chico(const tRender *render, uint16_t x, uint16_t y, uint8_t color)
+{
+    dibujar_rectangulo(render, x, y, 4, 4, COLOR_BLANCO);
+    dibujar_rectangulo(render, x + 1, y + 1, 2, 2, color);
+}
+
+void dibujar_muestra_tetromino_chico(const tRender *render,uint16_t x,uint16_t y,const uint8_t forma[4][4],uint8_t color)
+{
+    for (uint16_t fila = 0; fila < 4; fila++) {
+
+        for (uint16_t col = 0; col < 4; col++) {
+
+            if (forma[fila][col]) {
+
+                dibujar_mino_chico(render,x + (col * 4),y + (fila * 4),color);
+            }
+        }
+    }
+}

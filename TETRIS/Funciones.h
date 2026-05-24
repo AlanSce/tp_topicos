@@ -81,13 +81,15 @@ typedef enum {
     ESTADO_MENU,
     ESTADO_SUBMENU_JUEGO,
     ESTADO_INSTRUCCIONES,
+    ESTADO_DIFICULTAD,
+    ESTADO_NOMBRE,
     ESTADO_JUGANDO,
     ESTADO_PAUSA,
     ESTADO_SALIR
 } tEstadoJuego;
 
 typedef uint8_t tTablero[TABLERO_FILAS][TABLERO_COLUMNAS];
-
+extern float velocidad_actual;
 extern tGBT_ColorRGB paletaNES[CANT_COLORES];
 extern const tGlifo5x7 fuente5x7[];
 extern const uint8_t tetrominos[CANT_TETROMINOS][4][4][4];
@@ -113,6 +115,8 @@ void dibujar_fondo_ladrillos(const tRender *render);
 void dibujar_mino(const tRender *render, uint16_t x, uint16_t y, uint8_t color);
 void dibujar_mino_tablero(const tRender *render, uint16_t columna, uint16_t fila_visible, uint8_t color);
 void dibujar_muestra_tetromino(const tRender *render, uint16_t x, uint16_t y, const uint8_t forma[4][4], uint8_t color);
+void dibujar_mino_chico(const tRender *render,uint16_t x,uint16_t y,uint8_t color);
+void dibujar_muestra_tetromino_chico(const tRender *render,uint16_t x,uint16_t y,const uint8_t forma[4][4],uint8_t color);
 
 void tablero_vaciar(tTablero tablero);
 tPiezaActiva crear_pieza_aleatoria(void);
@@ -132,10 +136,14 @@ void dibujar_pausa(const tConfiguracionVentana *config);
 void dibujar_tablero(const tRender *render, const tTablero tablero);
 void dibujar_pieza_activa(const tRender *render, const tPiezaActiva *pieza);
 
-void dibujar_estadisticas(const tRender *render);
-void dibujar_pantalla_base(const tConfiguracionVentana *config);
+void dibujar_estadisticas(const tRender *render,const uint32_t estadisticas[]);
+void dibujar_pantalla_base(const tConfiguracionVentana *config,uint32_t score,uint32_t top_score,uint32_t lineas,const tPiezaActiva *siguiente_pieza,const uint32_t estadisticas[]);
 void dibujar_instrucciones(const tConfiguracionVentana *config);
 
 void dibujar_menu_principal(const tConfiguracionVentana *config, uint8_t opcion);
+
+void dibujar_pantalla_dificultad(const tConfiguracionVentana *config,uint8_t opcion);
+
+void dibujar_ingreso_nombre(const tConfiguracionVentana *config,const char *nombre);
 
 #endif // FUNCIONES_H_INCLUDED
