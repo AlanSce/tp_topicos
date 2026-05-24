@@ -24,6 +24,8 @@ Entrega: Si
 #include "lib/GBT_v2026.1C.01/include/GBT/gbt.h"
 #include "Funciones.h"
 
+float velocidad_actual = CAIDA_INICIAL_SEGUNDOS; //variable global, la necesito en memoria para el control de la pantalla base
+
 int main(int argc, char *argv[])
 {
     tOpcionesArranque opciones = leer_opciones_arranque(argc, argv);
@@ -35,14 +37,25 @@ int main(int argc, char *argv[])
     tTablero tablero;
 
     tPiezaActiva pieza;
+    tPiezaActiva siguiente_pieza;
 
     tEstadoJuego estado = ESTADO_MENU;
 
     uint8_t opcion_menu = 0;
-
     uint8_t opcion_submenu = 0;
-
+    uint8_t opcion_dificultad = 0;
     uint8_t hay_partida = 0;
+
+    uint32_t score = 0;
+    uint32_t top_score = 0;
+    uint32_t lineas_totales = 0;
+
+    uint32_t estadisticas_piezas[CANT_TETROMINOS] = {0};
+
+    char nombre_jugador[32] = "JUGADOR";
+
+    float velocidad_base = CAIDA_INICIAL_SEGUNDOS;
+    uint32_t piezas_caidas = 0;
 
     if (gbt_iniciar() != 0) {
 
@@ -101,7 +114,12 @@ int main(int argc, char *argv[])
 
     srand((unsigned int) time(NULL));
 
-    reiniciar_partida(tablero, &pieza);
+    tablero_vaciar(tablero);
+
+    pieza = crear_pieza_aleatoria();
+    siguiente_pieza = crear_pieza_aleatoria();
+
+    estadisticas_piezas[pieza.tipo]++;
 
     uint8_t corriendo = 1;
 
@@ -110,8 +128,6 @@ int main(int argc, char *argv[])
         gbt_procesar_entrada();
 
         eGBT_Tecla tecla = gbt_obtener_tecla_presionada();
-
-
 
         if (estado == ESTADO_MENU) {
 
@@ -141,7 +157,6 @@ int main(int argc, char *argv[])
                     estado = ESTADO_INSTRUCCIONES;
                 }
 
-
                 else {
 
                     corriendo = 0;
@@ -156,7 +171,6 @@ int main(int argc, char *argv[])
 
             continue;
         }
-
 
         if (estado == ESTADO_SUBMENU_JUEGO) {
 
@@ -189,11 +203,7 @@ int main(int argc, char *argv[])
 
                     case 1:
 
-                        reiniciar_partida(tablero, &pieza);
-
-                        hay_partida = 1;
-
-                        estado = ESTADO_JUGANDO;
+                        estado = ESTADO_DIFICULTAD;
 
                         break;
 
@@ -219,6 +229,125 @@ int main(int argc, char *argv[])
             continue;
         }
 
+        if (estado == ESTADO_DIFICULTAD) {
+
+            if (tecla == GBTK_ARRIBA && opcion_dificultad > 0) {
+
+                opcion_dificultad--;
+            }
+
+            if (tecla == GBTK_ABAJO && opcion_dificultad < 2) {
+
+                opcion_dificultad++;
+            }
+
+            if (tecla == GBTK_ENTER) {
+
+                if (opcion_dificultad == 0) {
+
+                    velocidad_base = 0.8f;
+                }
+
+                else if (opcion_dificultad == 1) {
+
+                    velocidad_base = 0.6f;
+                }
+
+                else {
+
+                    velocidad_base = 0.4f;
+                }
+
+                velocidad_actual = velocidad_base;
+
+                gbt_temporizador_destruir(temporizador_caida);
+
+                temporizador_caida = gbt_temporizador_crear(velocidad_actual);
+
+                if (score > top_score) {top_score = score;}
+
+                score = 0;
+                lineas_totales = 0;
+                piezas_caidas = 0;
+
+                for (int i = 0; i < CANT_TETROMINOS; i++) {
+
+                    estadisticas_piezas[i] = 0;
+                }
+
+                tablero_vaciar(tablero);
+
+                pieza = crear_pieza_aleatoria();
+                siguiente_pieza = crear_pieza_aleatoria();
+
+                estadisticas_piezas[pieza.tipo]++;
+
+                hay_partida = 1;
+                strcpy(nombre_jugador, "");
+                estado = ESTADO_NOMBRE;
+            }
+
+            if (tecla == GBTK_q) {
+
+                estado = ESTADO_MENU;
+            }
+            dibujar_pantalla_dificultad(&config, opcion_dificultad);
+
+            gbt_volcar_backbuffer();
+
+            gbt_esperar(16);
+
+            continue;
+        }
+
+        if (estado == ESTADO_NOMBRE) {
+
+            if (tecla >= GBTK_a && tecla <= GBTK_z) {
+
+                size_t len = strlen(nombre_jugador);
+
+                if (len < 15) {
+
+                    nombre_jugador[len] =
+                        'A' + (tecla - GBTK_a);
+
+                    nombre_jugador[len + 1] = '\0';
+                }
+            }
+
+            if (tecla == GBTK_RETROCESO) {
+
+                size_t len = strlen(nombre_jugador);
+
+                if (len > 0) {
+
+                    nombre_jugador[len - 1] = '\0';
+                }
+            }
+
+            if (tecla == GBTK_ENTER) {
+
+                FILE *archivo =fopen("estadisticas_jugador.txt", "a");
+
+                if (archivo) {
+
+                    fprintf(archivo,"Jugador: %s\n",nombre_jugador);
+
+                    fclose(archivo);
+                }
+
+
+                estado = ESTADO_JUGANDO;
+            }
+
+            dibujar_ingreso_nombre(&config,nombre_jugador);
+
+            gbt_volcar_backbuffer();
+
+            gbt_esperar(16);
+
+            continue;
+        }
 
         if (estado == ESTADO_INSTRUCCIONES) {
 
@@ -236,7 +365,6 @@ int main(int argc, char *argv[])
             continue;
         }
 
-
         if (estado == ESTADO_PAUSA) {
 
             if (tecla == GBTK_p) {
@@ -244,7 +372,7 @@ int main(int argc, char *argv[])
                 estado = ESTADO_JUGANDO;
             }
 
-            dibujar_pantalla_base(&config);
+            dibujar_pantalla_base(&config,score,top_score,lineas_totales,&siguiente_pieza,estadisticas_piezas);
 
             dibujar_tablero(&render, tablero);
 
@@ -259,7 +387,6 @@ int main(int argc, char *argv[])
             continue;
         }
 
-
         if (estado == ESTADO_JUGANDO) {
 
             if (tecla == GBTK_p) {
@@ -271,14 +398,21 @@ int main(int argc, char *argv[])
 
             if (tecla == GBTK_q) {
 
+                FILE *archivo =fopen("estadisticas_jugador.txt", "a");
+
+                if (archivo) {
+
+                    fprintf(archivo,"Jugador: %s Score: %u Lineas: %u\n",nombre_jugador,score,lineas_totales);
+
+                    fclose(archivo);
+                }
+
                 estado = ESTADO_MENU;
 
                 continue;
             }
 
             else if (tecla == GBTK_IZQUIERDA) {
-
-                printf("[tecla] IZQUIERDA\n");
 
                 intentar_mover(
                     tablero,
@@ -290,8 +424,6 @@ int main(int argc, char *argv[])
 
             else if (tecla == GBTK_DERECHA) {
 
-                printf("[tecla] DERECHA\n");
-
                 intentar_mover(
                     tablero,
                     &pieza,
@@ -302,7 +434,7 @@ int main(int argc, char *argv[])
 
             else if (tecla == GBTK_ABAJO) {
 
-                printf("[tecla] ABAJO\n");
+                score += 1;
 
                 intentar_mover(
                     tablero,
@@ -314,8 +446,6 @@ int main(int argc, char *argv[])
 
             else if (tecla == GBTK_ARRIBA) {
 
-                printf("[tecla] ARRIBA\n");
-
                 intentar_rotar(
                     tablero,
                     &pieza,
@@ -325,8 +455,6 @@ int main(int argc, char *argv[])
 
             else if (tecla == GBTK_z) {
 
-                printf("[tecla] Z\n");
-
                 intentar_rotar(
                     tablero,
                     &pieza,
@@ -334,15 +462,7 @@ int main(int argc, char *argv[])
                     "tecla z");
             }
 
-            else if (tecla != GBTK_DESCONOCIDA) {
-
-                printf("[tecla] codigo=%d\n", tecla);
-            }
-
-            // TIMER
             if (gbt_temporizador_consumir(temporizador_caida)) {
-
-                printf("[timer] caida consumida\n");
 
                 if (!intentar_mover(
                         tablero,
@@ -353,17 +473,42 @@ int main(int argc, char *argv[])
 
                     fijar_pieza(tablero, &pieza);
 
+                    piezas_caidas++;
+
+                    if (piezas_caidas % 10 == 0) {
+
+                        velocidad_actual *= 0.97f;
+
+                        gbt_temporizador_destruir( temporizador_caida);
+
+                        temporizador_caida = gbt_temporizador_crear(velocidad_actual);
+                    }
+
                     uint8_t lineas =
                         eliminar_lineas(tablero);
 
                     if (lineas > 0) {
 
-                        printf(
-                            "[lineas] eliminadas=%d\n",
-                            lineas);
+                        uint32_t multiplicador =(uint32_t)(1.0f / velocidad_actual);
+
+                    if (multiplicador < 1) {
+                            multiplicador = 1;
                     }
 
-                    pieza = crear_pieza_aleatoria();
+                    uint32_t puntos =(lineas *(100 + ((lineas - 1) * 10)))* multiplicador;
+
+                        score += puntos;
+
+                        lineas_totales += lineas;
+
+                        printf("[lineas] eliminadas=%d puntos=%u score=%u\n",lineas,puntos,score);
+                    }
+
+                    pieza = siguiente_pieza;
+                    estadisticas_piezas[pieza.tipo]++;
+
+                    siguiente_pieza =crear_pieza_aleatoria();
+
 
                     if (!puede_ubicar(
                             tablero,
@@ -373,6 +518,25 @@ int main(int argc, char *argv[])
 
                         printf("[game] game over\n");
 
+                        FILE *archivo =
+                            fopen(
+                                "estadisticas_jugador.txt",
+                                "a");
+
+                        if (archivo) {
+
+                            fprintf(
+                                archivo,
+                                "GAME OVER - Jugador: %s "
+                                "Score: %u "
+                                "Lineas: %u\n",
+                                nombre_jugador,
+                                score,
+                                lineas_totales);
+
+                            fclose(archivo);
+                        }
+
                         hay_partida = 0;
 
                         estado = ESTADO_MENU;
@@ -380,7 +544,14 @@ int main(int argc, char *argv[])
                 }
             }
 
-            dibujar_pantalla_base(&config);
+            dibujar_pantalla_base(
+                &config,
+                score,
+                top_score,
+                lineas_totales,
+                &siguiente_pieza,
+                estadisticas_piezas
+            );
 
             dibujar_tablero(&render, tablero);
 
